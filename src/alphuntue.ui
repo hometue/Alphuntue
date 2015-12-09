@@ -145,12 +145,54 @@
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QWidget" name="layoutWidget">
+     <widget class="QWidget" name="">
       <property name="geometry">
        <rect>
-        <x>500</x>
-        <y>30</y>
-        <width>199</width>
+        <x>200</x>
+        <y>310</y>
+        <width>74</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="elapsedTime">
+         <property name="text">
+          <string>00:00</string>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::NoTextInteraction</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="GSL_timeSeperator">
+         <property name="text">
+          <string>/</string>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::NoTextInteraction</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="totalTime">
+         <property name="text">
+          <string>01:00</string>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::NoTextInteraction</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>501</x>
+        <y>31</y>
+        <width>182</width>
         <height>22</height>
        </rect>
       </property>
@@ -189,54 +231,6 @@
         </widget>
        </item>
       </layout>
-     </widget>
-     <widget class="QLabel" name="totalTime">
-      <property name="geometry">
-       <rect>
-        <x>260</x>
-        <y>310</y>
-        <width>31</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>01:00</string>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
-     </widget>
-     <widget class="QLabel" name="GSL_timeSeperator">
-      <property name="geometry">
-       <rect>
-        <x>240</x>
-        <y>310</y>
-        <width>10</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>/</string>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
-     </widget>
-     <widget class="QLabel" name="elapsedTime">
-      <property name="geometry">
-       <rect>
-        <x>200</x>
-        <y>310</y>
-        <width>31</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>00:00</string>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_4">

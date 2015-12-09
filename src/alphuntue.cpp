@@ -39,6 +39,7 @@ alphuntue::alphuntue(QWidget *parent) :
 		ui->GSLcountry->addItem(countrytemp);
 		countrytemp=in.readLine();
 	}
+	connect(GSLtimer, SIGNAL(timeout()), this, SLOT(updateTime()));
 }
 
 alphuntue::~alphuntue()
@@ -86,27 +87,18 @@ void alphuntue::on_nextSpeaker_clicked()
 		ui->timeBar->setMaximum(speakingTime);
 		ui->timeBar->setValue(0);
 		elapsed=0;
-		connect(GSLtimer, SIGNAL(timeout()), this, SLOT(updateTime()));
+		ui->timeBar->setValue(0);
 		GSLtimer->start(1000);
 		QString imgloc=QCoreApplication::applicationDirPath();
-		imgloc+="/img/";
+		imgloc.append("/img/");
 		imgloc+=countryName;
-		imgloc+=".png";
+		imgloc.append(".png");
 		QFileInfo checkFile(imgloc);
 		if(checkFile.isFile()){
 			QPixmap image(imgloc);
 			int lwidth=ui->countryImage->width();
 			int lheight=ui->countryImage->height();
-			int iwidth=image.width();
-			int iheight=image.height();
-			float widthRatio=iwidth/lwidth;
-			float heightRatio=iheight/lheight;
-			if(widthRatio>=heightRatio){
-				image=image.scaledToWidth(lwidth);
-			}
-			else{
-				image=image.scaledToHeight(lheight);
-			}
+			image=image.scaled(lwidth,lheight, Qt::KeepAspectRatio, Qt::FastTransformation);
 			ui->countryImage->setPixmap(image);
 		}
 		ui->speakingCountry->setText(countryName);
