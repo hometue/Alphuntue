@@ -19,6 +19,6 @@ HEADERS  += alphuntue.h
 
 FORMS    += alphuntue.ui
 
-CONFIG += static static-runtime
+CONFIG += static
 
 QTPLUGIN += qsqloci qgif
