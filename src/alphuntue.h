@@ -32,7 +32,7 @@ private slots:
 
 	void unmod_updateTime();
 
-	void updateTotalTime(int hour, int minute, int second);
+	void unmod_updateTotalTime(int hour, int minute, int second);
 
 	void on_unmod_hour_valueChanged(int arg1);
 
@@ -41,6 +41,8 @@ private slots:
 	void updateElapsedTime();
 
 	void on_unmod_stop_clicked();
+
+	void on_actionCountries_present_triggered();
 
 private:
     Ui::alphuntue *ui;
