@@ -76,46 +76,54 @@ void alphuntue::on_GSL_addCountry_clicked()
 void alphuntue::GSL_updateTime(){
 	if(GSL_elapsed<GSL_speakingTime){
 		GSL_elapsed++;
+		unsigned int second=GSL_elapsed%60;
+		int minute=GSL_elapsed/60;
+		QString label="";
+		if(minute<10){
+			label=('0');
+		}
+		label.append(QString::number(minute));
+		label.append(':');
+		if(second<10){
+			label.append('0');
+		}
+		label.append(QString::number(second));
+		ui->GSL_elapsedTime->setText(label);
+		ui->GSL_timeBar->setValue(GSL_elapsed);
 	}
 	else{
-		GSLtimer->stop();
+		GSL_stop();
 	}
-	unsigned int second=GSL_elapsed%60;
-	int minute=GSL_elapsed/60;
-	QString label="";
-	if(minute<10){
-		label=('0');
-	}
-	label.append(QString::number(minute));
-	label.append(':');
-	if(second<10){
-		label.append('0');
-	}
-	label.append(QString::number(second));
-	ui->GSL_elapsedTime->setText(label);
-	ui->GSL_timeBar->setValue(GSL_elapsed);
 }
 
 void alphuntue::on_GSL_nextSpeaker_clicked()
 {
-	QListWidgetItem *countryWidget=ui->GSL->takeItem(0);
-	if(countryWidget!=0){
-		QString countryName=countryWidget->text();
-		ui->GSL_timeBar->setMaximum(GSL_speakingTime);
-		ui->GSL_timeBar->setValue(0);
-		GSL_elapsed=0;
-		ui->GSL_elapsedTime->setText("00:00");
-		QString imgloc=QCoreApplication::applicationDirPath();
-		imgloc.append("/img/");
-		imgloc+=countryName;
-		imgloc.append(".png");
-		if(QFileInfo(imgloc).exists()){
-			QPixmap image(imgloc);
-			image=image.scaled(ui->GSL_countryImage->width(),ui->GSL_countryImage->height(), Qt::KeepAspectRatio, Qt::FastTransformation);
-			ui->GSL_countryImage->setPixmap(image);
+	if(GSL_speakingTime==0){
+		QMessageBox::critical(this, "Error", "Speaking time cannot be set to 0");
+		return;
+	}
+	else{
+		QListWidgetItem *countryWidget=ui->GSL->takeItem(0);
+		if(countryWidget!=0){
+			QString countryName=countryWidget->text();
+			ui->GSL_timeBar->setMaximum(GSL_speakingTime);
+			ui->GSL_timeBar->setValue(0);
+			GSL_elapsed=0;
+			ui->GSL_elapsedTime->setText("00:00");
+			QString imgloc=QCoreApplication::applicationDirPath();
+			imgloc.append("/img/");
+			imgloc+=countryName;
+			imgloc.append(".png");
+			if(QFileInfo(imgloc).exists()){
+				QPixmap image(imgloc);
+				image=image.scaled(ui->GSL_countryImage->width(),ui->GSL_countryImage->height(), Qt::KeepAspectRatio, Qt::FastTransformation);
+				ui->GSL_countryImage->setPixmap(image);
+			}
+			ui->GSL_speakingCountry->setText(countryName);
+			ui->GSL_time_min->setEnabled(false);
+			ui->GSL_time_s->setEnabled(false);
+			GSLtimer->start(1000);
 		}
-		ui->GSL_speakingCountry->setText(countryName);
-		GSLtimer->start(1000);
 	}
 }
 
@@ -282,8 +290,6 @@ void alphuntue::on_unmod_stop_clicked()
 	ui->unmod_topic->clear();
 }
 
-
-
 void alphuntue::on_actionCountries_present_triggered()
 {
 	QDialog selectPresent;
@@ -345,4 +351,19 @@ void alphuntue::updateLists(){
 		}
 		i++;
 	}
+}
+
+void alphuntue::on_GSL_stop_clicked()
+{
+	GSL_stop();
+}
+
+void alphuntue::GSL_stop(){
+	GSLtimer->stop();
+	ui->GSL_elapsedTime->setText("00:00");
+	ui->GSL_timeBar->setValue(0);
+	ui->GSL_speakingCountry->clear();
+	ui->GSL_countryImage->clear();
+	ui->GSL_time_min->setEnabled(true);
+	ui->GSL_time_s->setEnabled(true);
 }

@@ -49,6 +49,10 @@ private slots:
 
 	void updateLists();
 
+	void on_GSL_stop_clicked();
+
+	void GSL_stop();
+
 private:
     Ui::alphuntue *ui;
 };
