@@ -282,12 +282,15 @@ void alphuntue::on_unmod_stop_clicked()
 	ui->unmod_topic->clear();
 }
 
+
+
 void alphuntue::on_actionCountries_present_triggered()
 {
 	QDialog selectPresent;
 	selectPresent.setModal(true);
 	QLabel *text=new QLabel("Countries present");
 	QListWidget *listWidget = new QListWidget(this);
+	QPushButton *button=new QPushButton("Ok", this);
 	QVBoxLayout *layout = new QVBoxLayout();
 	int i=0;
 	QListWidgetItem* item;
@@ -302,8 +305,44 @@ void alphuntue::on_actionCountries_present_triggered()
 		}
 		i++;
 	}
+	connect(listWidget, &QListWidget::itemChanged, this, &alphuntue::updatePresent);
+	connect(button, &QPushButton::clicked, &selectPresent, &QDialog::accept);
 	layout->addWidget(text);
 	layout->addWidget(listWidget);
+	layout->addWidget(button);
 	selectPresent.setLayout(layout);
 	selectPresent.exec();
+	updateLists();
+}
+
+void alphuntue::updatePresent(QListWidgetItem *item){
+	Qt::CheckState checked=item->checkState();
+	bool check;
+	if(checked==0){
+		check=false;
+	}
+	else{
+		check=true;
+	}
+	QString countrystr=item->text();
+	int i=0;
+	bool done=false;
+	while(i<allcountries.size() && done==false){
+		if(allcountries[i]==countrystr){
+			present[i]=check;
+			done=true;
+		}
+		i++;
+	}
+}
+
+void alphuntue::updateLists(){
+	int i=0;
+	ui->GSL_GSLcountry->clear();
+	while(i<allcountries.size()){
+		if(present[i]==true){
+			ui->GSL_GSLcountry->addItem(allcountries.at(i).toLocal8Bit().constData());
+		}
+		i++;
+	}
 }

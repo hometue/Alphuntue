@@ -2,6 +2,7 @@
 #define ALPHUNTUE_H
 
 #include <QMainWindow>
+#include <QListWidgetItem>
 
 namespace Ui {
 class alphuntue;
@@ -43,6 +44,10 @@ private slots:
 	void on_unmod_stop_clicked();
 
 	void on_actionCountries_present_triggered();
+
+	void updatePresent(QListWidgetItem *item);
+
+	void updateLists();
 
 private:
     Ui::alphuntue *ui;
