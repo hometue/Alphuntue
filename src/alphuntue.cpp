@@ -17,6 +17,7 @@
 
 QStringList allcountries;
 unsigned int GSL_speakingTime=60, GSL_elapsed=0, unmod_totaltime=0, unmod_elapsed=0;
+int GSL_remainingTimer;
 QTimer *GSLtimer=new QTimer(), *unmodtimer=new QTimer();
 std::vector<bool> present;
 
@@ -55,6 +56,7 @@ alphuntue::alphuntue(QWidget *parent) :
 	}
 	//disable all things that need to be disabled
 	ui->unmod_stop->setEnabled(false);
+	ui->GSL_resume->setEnabled(false);
 	//initialize timers
 	connect(GSLtimer, SIGNAL(timeout()), this, SLOT(GSL_updateTime()));
 	connect(unmodtimer, SIGNAL(timeout()), this, SLOT(unmod_updateTime()));
@@ -74,6 +76,9 @@ void alphuntue::on_GSL_addCountry_clicked()
 }
 
 void alphuntue::GSL_updateTime(){
+	if(GSLtimer->interval()!=1000){
+		GSLtimer->setInterval(1000);
+	}
 	if(GSL_elapsed<GSL_speakingTime){
 		GSL_elapsed++;
 		unsigned int second=GSL_elapsed%60;
@@ -366,4 +371,32 @@ void alphuntue::GSL_stop(){
 	ui->GSL_countryImage->clear();
 	ui->GSL_time_min->setEnabled(true);
 	ui->GSL_time_s->setEnabled(true);
+	ui->GSL_resume->setEnabled(false);
+	ui->GSL_pause->setEnabled(true);
+}
+
+void alphuntue::on_GSL_pause_clicked()
+{
+	if(GSLtimer->remainingTime()==-1){
+		return;
+	}
+	GSL_pause(GSLtimer->remainingTime());
+	ui->GSL_resume->setEnabled(true);
+	ui->GSL_pause->setEnabled(false);
+}
+
+void alphuntue::GSL_pause(int time){
+	GSLtimer->stop();
+	GSL_remainingTimer=time;
+}
+
+void alphuntue::GSL_resume(){
+	GSLtimer->start(GSL_remainingTimer);
+}
+
+void alphuntue::on_GSL_resume_clicked()
+{
+	GSL_resume();
+	ui->GSL_resume->setEnabled(false);
+	ui->GSL_pause->setEnabled(true);
 }

@@ -1,9 +1,16 @@
-Features
+Alphuntue is an application for use in a Model United Nations. Admittedly it may look like wxmun, but it is made with different engine (QT) and all, but users of wxmun will not face too much an issue as the UI is quite similar.
+
+Current version: Alpha (Maybe I should give a version number)
+
+Features:
+Indicating present delegation
 GSL (Yielding not done)
-ALlow custom delegation
+Unmoderated caucus.
+ALlow custom delegation.
 
 Todo:
 Make a better looking README
-Add roll call, (un)mod caucus, voting, just everything else.
+Add roll call, mod caucus, voting, just everything else.
+Make a better looking app.
 
 If you face any issues please report it here: https://github.com/hometue/Alphuntue/issues

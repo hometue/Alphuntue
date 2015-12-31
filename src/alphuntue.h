@@ -53,6 +53,14 @@ private slots:
 
 	void GSL_stop();
 
+	void GSL_pause(int time);
+
+	void GSL_resume();
+
+	void on_GSL_pause_clicked();
+
+	void on_GSL_resume_clicked();
+
 private:
     Ui::alphuntue *ui;
 };
