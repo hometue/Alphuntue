@@ -16,9 +16,10 @@
 #include "ui_alphuntue.h"
 
 QStringList allcountries;
-unsigned int GSL_speakingTime=60, GSL_elapsed=0, unmod_totaltime=0, unmod_elapsed=0;
-int GSL_remainingTimer;
-QTimer *GSLtimer=new QTimer(), *unmodtimer=new QTimer();
+unsigned int GSL_speakingTime=60, GSL_elapsed=0, unmod_totaltime=0, unmod_elapsed=0, mod_totaltime=600;
+unsigned int mod_speakingtime_elapsed=0, mod_totaltime_elapsed=0, mod_speakingtime=60;
+int GSL_remainingTimer, mod_ind_remainingTimer, mod_total_remainingTimer;
+QTimer *GSLtimer=new QTimer(), *unmodtimer=new QTimer(), *mod_indtimer=new QTimer(), *mod_totaltimer=new QTimer();
 std::vector<bool> present;
 
 alphuntue::alphuntue(QWidget *parent) :
@@ -31,6 +32,9 @@ alphuntue::alphuntue(QWidget *parent) :
 	ui->GSL_speakingCountry->clear();
 	ui->GSL_countryImage->clear();
 	ui->unmod_topic->clear();
+	ui->mod_topic_label->clear();
+	ui->mod_countryimg_label->clear();
+	ui->mod_countryName_label->clear();
 	//load country.txt
 	QString fileloc=QCoreApplication::applicationDirPath();
 	fileloc+="/country.txt";
@@ -52,14 +56,21 @@ alphuntue::alphuntue(QWidget *parent) :
 	//TODO: Shift them based on the present.
 	while(i<allcountries.size()){
 		ui->GSL_GSLcountry->addItem(allcountries.at(i).toLocal8Bit().constData());
+		ui->mod_modcountry->addItem(allcountries.at(i).toLocal8Bit().constData());
 		i++;
 	}
 	//disable all things that need to be disabled
 	ui->unmod_stop->setEnabled(false);
 	ui->GSL_resume->setEnabled(false);
+	ui->mod_stop->setEnabled(false);
+	ui->mod_pause->setEnabled(false);
+	ui->mod_nextSpeaker->setEnabled(false);
+	ui->mod_resume->setEnabled(false);
 	//initialize timers
 	connect(GSLtimer, SIGNAL(timeout()), this, SLOT(GSL_updateTime()));
 	connect(unmodtimer, SIGNAL(timeout()), this, SLOT(unmod_updateTime()));
+	connect(mod_indtimer, SIGNAL(timeout()), this, SLOT(mod_ind_timerUpdate()));
+	connect(mod_totaltimer, SIGNAL(timeout()), this, SLOT(mod_total_timerUpdate()));
 }
 
 alphuntue::~alphuntue()
@@ -125,6 +136,7 @@ void alphuntue::on_GSL_nextSpeaker_clicked()
 				ui->GSL_countryImage->setPixmap(image);
 			}
 			ui->GSL_speakingCountry->setText(countryName);
+			delete countryWidget;
 			ui->GSL_time_min->setEnabled(false);
 			ui->GSL_time_s->setEnabled(false);
 			GSLtimer->start(1000);
@@ -235,8 +247,7 @@ void alphuntue::on_unmod_start_clicked()
 		ui->unmod_stop->setEnabled(true);
 		ui->unmod_elapsedTime->setText("00:00:00");
 		ui->unmod_progressBar->setMaximum(unmod_totaltime);
-		int second=ui->unmod_second->value();
-		unmod_updateTotalTime(ui->unmod_hour->value(), ui->unmod_minute->value(), second=ui->unmod_second->value());
+		unmod_updateTotalTime(ui->unmod_hour->value(), ui->unmod_minute->value(), ui->unmod_second->value());
 		unmodtimer->start(1000);
 	}
 }
@@ -350,9 +361,11 @@ void alphuntue::updatePresent(QListWidgetItem *item){
 void alphuntue::updateLists(){
 	int i=0;
 	ui->GSL_GSLcountry->clear();
+	ui->mod_modcountry->clear();
 	while(i<allcountries.size()){
 		if(present[i]==true){
 			ui->GSL_GSLcountry->addItem(allcountries.at(i).toLocal8Bit().constData());
+			ui->mod_modcountry->addItem(allcountries.at(i).toLocal8Bit().constData());
 		}
 		i++;
 	}
@@ -399,4 +412,293 @@ void alphuntue::on_GSL_resume_clicked()
 	GSL_resume();
 	ui->GSL_resume->setEnabled(false);
 	ui->GSL_pause->setEnabled(true);
+}
+
+void alphuntue::on_GSL_yield_clicked()
+{
+	if(GSLtimer->remainingTime()==-1){
+		return;
+	}
+	GSL_pause(GSLtimer->remainingTime());
+	//add code to change current speaking country
+	GSL_resume();
+}
+
+void alphuntue::on_mod_ind_min_valueChanged(int arg1)
+{
+	int second=ui->mod_ind_s->value();
+	int minute=arg1;
+	mod_speakingtime=minute*60+second;
+	mod_updateIndTotalTime(minute, second);
+}
+
+void alphuntue::mod_updateIndTotalTime(int minute, int second){
+	QString total="";
+	if(minute<10){
+		total='0';
+	}
+	total.append(QString::number(minute));
+	total.append(':');
+	if(second<10){
+		total.append('0');
+	}
+	total.append(QString::number(second));
+	ui->mod_ind_totalTime_label->setText(total);
+}
+
+void alphuntue::on_mod_ind_s_valueChanged(int arg1)
+{
+	int second=arg1;
+	int minute=ui->mod_ind_min->value();
+	mod_speakingtime=minute*60+second;
+	mod_updateIndTotalTime(minute, second);
+}
+
+void alphuntue::on_mod_addCountry_clicked()
+{
+	if(ui->mod_modcountry->currentIndex()!=-1){
+		QString countryname=ui->mod_modcountry->currentText();
+		new QListWidgetItem(countryname.toStdString().c_str(), ui->mod_countrylist);
+	}
+}
+
+void alphuntue::on_mod_start_clicked()
+{
+	QString title=ui->mod_topic->text();
+	if(title==0){
+		QMessageBox msgBox;
+		msgBox.setText("Empty topic!");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	if(mod_speakingtime==0){
+		QMessageBox msgBox;
+		msgBox.setText("Speaking time cannot be 0!");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	if(mod_totaltime==0){
+		QMessageBox msgBox;
+		msgBox.setText("Duration cannot be 0!");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	ui->mod_topic_label->setText(title);
+	ui->mod_ind_progressBar->setMaximum(mod_speakingtime);
+	ui->mod_total_progressBar->setMaximum(mod_totaltime);
+	ui->mod_topic->setEnabled(false);
+	ui->mod_start->setEnabled(false);
+	ui->mod_stop->setEnabled(true);
+	ui->mod_pause->setEnabled(true);
+	ui->mod_nextSpeaker->setEnabled(true);
+	ui->mod_ind_min->setEnabled(false);
+	ui->mod_ind_s->setEnabled(false);
+	ui->mod_total_h->setEnabled(false);
+	ui->mod_total_min->setEnabled(false);
+	ui->mod_total_s->setEnabled(false);
+	mod_totaltimer->start(1000);
+}
+
+
+void alphuntue::mod_ind_timerUpdate(){
+	if(mod_indtimer->interval()!=1000){
+		mod_indtimer->setInterval(1000);
+	}
+	if(mod_speakingtime_elapsed<mod_speakingtime){
+		mod_speakingtime_elapsed++;
+		unsigned int second=mod_speakingtime_elapsed%60;
+		int minute=mod_speakingtime_elapsed/60;
+		QString label="";
+		if(minute<10){
+			label=('0');
+		}
+		label.append(QString::number(minute));
+		label.append(':');
+		if(second<10){
+			label.append('0');
+		}
+		label.append(QString::number(second));
+		ui->mod_ind_elapsed_label->setText(label);
+		ui->mod_ind_progressBar->setValue(mod_speakingtime_elapsed);
+	}
+	else{
+		mod_speakingOver();
+	}
+}
+
+void alphuntue::mod_speakingOver(){
+	mod_indtimer->stop();
+	ui->mod_countryName_label->clear();
+	ui->mod_countryimg_label->clear();
+	ui->mod_ind_elapsed_label->setText("00:00");
+	ui->mod_ind_progressBar->setValue(0);
+	mod_speakingtime_elapsed=0;
+}
+
+void alphuntue::mod_total_timerUpdate(){
+	if(mod_totaltimer->interval()!=1000){
+		mod_totaltimer->setInterval(1000);
+	}
+	if(mod_totaltime_elapsed<mod_totaltime){
+		mod_totaltime_elapsed++;
+		unsigned int second=mod_totaltime_elapsed%60;
+		int minute=((mod_totaltime_elapsed%3600)-second)/60;
+		int hour=mod_totaltime_elapsed/3600;
+		QString label="";
+		if(hour<10){
+			label=('0');
+		}
+		label.append(QString::number(hour));
+		label.append(':');
+		if(minute<10){
+			label.append('0');
+		}
+		label.append(QString::number(minute));
+		label.append(':');
+		if(second<10){
+			label.append('0');
+		}
+		label.append(QString::number(second));
+		ui->mod_total_elapsed_label->setText(label);
+		ui->mod_total_progressBar->setValue(mod_totaltime_elapsed);
+	}
+	else{
+		mod_stopped();
+		QMessageBox msgBox;
+		msgBox.setText("Time for the moderated caucus has elapsed");
+		msgBox.setIcon(QMessageBox::Information);
+		msgBox.exec();
+	}
+}
+
+void alphuntue::mod_stopped(){
+	mod_indtimer->stop();
+	mod_totaltimer->stop();
+	ui->mod_topic_label->clear();
+	ui->mod_countryimg_label->clear();
+	ui->mod_countryName_label->clear();
+	ui->mod_ind_elapsed_label->setText("00:00");
+	ui->mod_total_elapsed_label->setText("00:00:00");
+	mod_totaltime_elapsed=0;
+	mod_speakingtime_elapsed=0;
+	ui->mod_ind_progressBar->setValue(0);
+	ui->mod_total_progressBar->setValue(0);
+}
+
+void alphuntue::on_mod_clear_clicked()
+{
+	ui->mod_countrylist->clear();
+}
+
+void alphuntue::on_mod_remove_clicked()
+{
+	int row=ui->mod_countrylist->currentRow();
+	if(row==-1){
+		return;
+	}
+	QListWidgetItem * remove=ui->mod_countrylist->takeItem(row);
+	delete remove;
+}
+
+void alphuntue::mod_updatetotalTotalTime(int hour, int minute, int second){
+	QString label="";
+	if(hour<10){
+		label=('0');
+	}
+	label.append(QString::number(hour));
+	label.append(':');
+	if(minute<10){
+		label.append('0');
+	}
+	label.append(QString::number(minute));
+	label.append(':');
+	if(second<10){
+		label.append('0');
+	}
+	label.append(QString::number(second));
+	ui->mod_total_totalTime_label->setText(label);
+}
+
+void alphuntue::on_mod_total_min_valueChanged(int arg1)
+{
+	int hour=ui->mod_total_h->value();
+	int minute=arg1;
+	int second=ui->mod_total_s->value();
+	mod_totaltime=hour*3600+minute*60+second;
+	mod_updatetotalTotalTime(hour, minute, second);
+}
+
+void alphuntue::on_mod_total_h_valueChanged(int arg1)
+{
+	int hour=arg1;
+	int minute=ui->mod_total_min->value();
+	int second=ui->mod_total_s->value();
+	mod_totaltime=hour*3600+minute*60+second;
+	mod_updatetotalTotalTime(hour, minute, second);
+}
+
+void alphuntue::on_mod_total_s_valueChanged(int arg1)
+{
+	int hour=ui->mod_total_h->value();
+	int minute=ui->mod_total_min->value();
+	int second=arg1;
+	mod_totaltime=hour*3600+minute*60+second;
+	mod_updatetotalTotalTime(hour, minute, second);
+}
+
+void alphuntue::on_mod_nextSpeaker_clicked()
+{
+	QListWidgetItem *countryWidget=ui->mod_countrylist->takeItem(0);
+	if(countryWidget!=0){
+		QString countryName=countryWidget->text();
+		ui->mod_ind_progressBar->setValue(0);
+		mod_speakingtime_elapsed=0;
+		ui->mod_ind_elapsed_label->setText("00:00");
+		QString imgloc=QCoreApplication::applicationDirPath();
+		imgloc.append("/img/");
+		imgloc+=countryName;
+		imgloc.append(".png");
+		if(QFileInfo(imgloc).exists()){
+			QPixmap image(imgloc);
+			image=image.scaled(ui->mod_countryimg_label->width(),ui->mod_countryimg_label->height(), Qt::KeepAspectRatio, Qt::FastTransformation);
+			ui->mod_countryimg_label->setPixmap(image);
+		}
+		ui->mod_countryName_label->setText(countryName);
+		delete countryWidget;
+		mod_indtimer->start(1000);
+	}
+}
+
+void alphuntue::on_mod_stop_clicked()
+{
+	mod_stopped();
+}
+
+void alphuntue::on_mod_pause_clicked()
+{
+	if(mod_totaltimer->remainingTime()==-1){
+		return;
+	}
+	mod_ind_remainingTimer=-1;
+	if(mod_indtimer->remainingTime()!=-1){
+		mod_ind_remainingTimer=mod_indtimer->remainingTime();
+		mod_indtimer->stop();
+	}
+	mod_total_remainingTimer=mod_totaltimer->remainingTime();
+	mod_totaltimer->stop();
+	ui->mod_resume->setEnabled(true);
+	ui->mod_pause->setEnabled(false);
+}
+
+void alphuntue::on_mod_resume_clicked()
+{
+	mod_totaltimer->start(mod_total_remainingTimer);
+	if(mod_ind_remainingTimer!=-1){
+		mod_indtimer->start(mod_ind_remainingTimer);
+	}
+	ui->mod_resume->setEnabled(false);
+	ui->mod_pause->setEnabled(true);
 }

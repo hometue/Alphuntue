@@ -61,6 +61,46 @@ private slots:
 
 	void on_GSL_resume_clicked();
 
+	void on_GSL_yield_clicked();
+
+	void on_mod_ind_min_valueChanged(int arg1);
+
+	void mod_updateIndTotalTime(int minute, int second);
+
+	void mod_updatetotalTotalTime(int hour, int minute, int second);
+
+	void on_mod_ind_s_valueChanged(int arg1);
+
+	void on_mod_addCountry_clicked();
+
+	void on_mod_start_clicked();
+
+	void mod_ind_timerUpdate();
+
+	void mod_total_timerUpdate();
+
+	void mod_stopped();
+
+	void mod_speakingOver();
+
+	void on_mod_clear_clicked();
+
+	void on_mod_remove_clicked();
+
+	void on_mod_total_min_valueChanged(int arg1);
+
+	void on_mod_total_h_valueChanged(int arg1);
+
+	void on_mod_total_s_valueChanged(int arg1);
+
+	void on_mod_nextSpeaker_clicked();
+
+	void on_mod_stop_clicked();
+
+	void on_mod_pause_clicked();
+
+	void on_mod_resume_clicked();
+
 private:
     Ui::alphuntue *ui;
 };
