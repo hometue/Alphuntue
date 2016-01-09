@@ -101,6 +101,12 @@ private slots:
 
 	void on_mod_resume_clicked();
 
+	void on_GSL_addAllPresentDel_clicked();
+
+	void on_GSL_clear_clicked();
+
+	void on_GSL_remove_clicked();
+
 private:
     Ui::alphuntue *ui;
 };

@@ -62,6 +62,8 @@ alphuntue::alphuntue(QWidget *parent) :
 	//disable all things that need to be disabled
 	ui->unmod_stop->setEnabled(false);
 	ui->GSL_resume->setEnabled(false);
+	ui->GSL_yield->setEnabled(false);
+	ui->GSL_pause->setEnabled(false);
 	ui->mod_stop->setEnabled(false);
 	ui->mod_pause->setEnabled(false);
 	ui->mod_nextSpeaker->setEnabled(false);
@@ -139,6 +141,8 @@ void alphuntue::on_GSL_nextSpeaker_clicked()
 			delete countryWidget;
 			ui->GSL_time_min->setEnabled(false);
 			ui->GSL_time_s->setEnabled(false);
+			ui->GSL_yield->setEnabled(true);
+			ui->GSL_pause->setEnabled(true);
 			GSLtimer->start(1000);
 		}
 	}
@@ -386,6 +390,7 @@ void alphuntue::GSL_stop(){
 	ui->GSL_time_s->setEnabled(true);
 	ui->GSL_resume->setEnabled(false);
 	ui->GSL_pause->setEnabled(true);
+	ui->GSL_yield->setEnabled(false);
 }
 
 void alphuntue::on_GSL_pause_clicked()
@@ -420,6 +425,40 @@ void alphuntue::on_GSL_yield_clicked()
 		return;
 	}
 	GSL_pause(GSLtimer->remainingTime());
+	QDialog selectYield;
+	selectYield.setModal(true);
+	QLabel *text=new QLabel("Yield to...");
+	QListWidget *listWidget = new QListWidget(this);
+	QPushButton *button=new QPushButton("Ok", this);
+	QVBoxLayout *layout = new QVBoxLayout();
+	int i=0;
+	QListWidgetItem* item;
+	while(i<allcountries.size()){
+		if(present[i]==true){
+			item=new QListWidgetItem(allcountries.at(i).toLocal8Bit(),listWidget);
+		}
+		i++;
+	}
+	layout->addWidget(text);
+	layout->addWidget(listWidget);
+	layout->addWidget(button);
+	selectYield.setLayout(layout);
+	connect(button, &QPushButton::clicked, &selectYield, &QDialog::accept);
+	selectYield.exec();
+	if(listWidget->currentRow()==-1){
+		return;
+	}
+	QString countryName=allcountries.at(listWidget->currentRow());
+	ui->GSL_speakingCountry->setText(countryName);
+	QString imgloc=QCoreApplication::applicationDirPath();
+	imgloc.append("/img/");
+	imgloc+=countryName;
+	imgloc.append(".png");
+	if(QFileInfo(imgloc).exists()){
+		QPixmap image(imgloc);
+		image=image.scaled(ui->GSL_countryImage->width(),ui->GSL_countryImage->height(), Qt::KeepAspectRatio, Qt::FastTransformation);
+		ui->GSL_countryImage->setPixmap(image);
+	}
 	//add code to change current speaking country
 	GSL_resume();
 }
@@ -701,4 +740,32 @@ void alphuntue::on_mod_resume_clicked()
 	}
 	ui->mod_resume->setEnabled(false);
 	ui->mod_pause->setEnabled(true);
+}
+
+void alphuntue::on_GSL_addAllPresentDel_clicked()
+{
+	unsigned int i=0;
+	while(i<allcountries.size()){
+		if(present[i]==true){
+			QString countryname=allcountries[i];
+			new QListWidgetItem(countryname.toStdString().c_str(), ui->GSL);
+		}
+		i++;
+	}
+}
+
+void alphuntue::on_GSL_clear_clicked()
+{
+	ui->GSL->clear();
+}
+
+void alphuntue::on_GSL_remove_clicked()
+{
+
+	int row=ui->GSL->currentRow();
+	if(row==-1){
+		return;
+	}
+	QListWidgetItem * remove=ui->GSL->takeItem(row);
+	delete remove;
 }
