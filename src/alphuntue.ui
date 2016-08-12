@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>alphuntue</string>
+   <string>Alphuntue</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">
@@ -358,6 +358,16 @@
      <attribute name="title">
       <string>Single Speaker</string>
      </attribute>
+     <widget class="QListWidget" name="SS_countries">
+      <property name="geometry">
+       <rect>
+        <x>610</x>
+        <y>71</y>
+        <width>256</width>
+        <height>311</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="unmod_tab">
      <attribute name="title">
@@ -761,7 +771,7 @@
        <string>Resume</string>
       </property>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>600</x>
@@ -803,7 +813,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>590</x>
@@ -855,7 +865,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>540</x>
@@ -893,7 +903,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>180</x>
@@ -935,7 +945,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>190</x>
@@ -979,6 +989,102 @@
      </widget>
     </widget>
    </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>80</y>
+      <width>53</width>
+      <height>15</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_12">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetMinimumSize</enum>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_11">
+       <property name="text">
+        <string>Present:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="main_present_count">
+       <property name="text">
+        <string>-</string>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::NoTextInteraction</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>50</width>
+      <height>15</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_13">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetMinimumSize</enum>
+     </property>
+     <item>
+      <widget class="QLabel" name="main_council">
+       <property name="text">
+        <string>Council:</string>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::NoTextInteraction</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="main_council_title">
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>41</width>
+      <height>15</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_14">
+     <item>
+      <widget class="QLabel" name="label_10">
+       <property name="text">
+        <string>Topic:</string>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::NoTextInteraction</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="main_topic_text">
+       <property name="text">
+        <string>-</string>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::NoTextInteraction</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -993,9 +1099,26 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionLoad_council"/>
     <addaction name="actionCountries_present"/>
+    <addaction name="actionSave_state"/>
+    <addaction name="actionLoad_state"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout_Alphuntue"/>
+   </widget>
+   <widget class="QMenu" name="menuManage_debate">
+    <property name="title">
+     <string>Manage debate</string>
+    </property>
+    <addaction name="actionTopic"/>
    </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuHelp"/>
+   <addaction name="menuManage_debate"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="movable">
@@ -1015,6 +1138,31 @@
   <action name="actionCountries_present">
    <property name="text">
     <string>Countries present</string>
+   </property>
+  </action>
+  <action name="actionAbout_Alphuntue">
+   <property name="text">
+    <string>About Alphuntue</string>
+   </property>
+  </action>
+  <action name="actionSave_state">
+   <property name="text">
+    <string>Save state</string>
+   </property>
+  </action>
+  <action name="actionLoad_state">
+   <property name="text">
+    <string>Load state</string>
+   </property>
+  </action>
+  <action name="actionLoad_council">
+   <property name="text">
+    <string>Load council</string>
+   </property>
+  </action>
+  <action name="actionTopic">
+   <property name="text">
+    <string>Topic</string>
    </property>
   </action>
  </widget>

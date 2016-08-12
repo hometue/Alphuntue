@@ -15,12 +15,19 @@
 #include "alphuntue.h"
 #include "ui_alphuntue.h"
 
-QStringList allcountries;
+
+//function to count number of 1s in present
+bool ifOne(bool i){
+	return i;
+}
+
+QStringList allcountries, topics;
 unsigned int GSL_speakingTime=60, GSL_elapsed=0, unmod_totaltime=0, unmod_elapsed=0, mod_totaltime=600;
 unsigned int mod_speakingtime_elapsed=0, mod_totaltime_elapsed=0, mod_speakingtime=60;
 int GSL_remainingTimer, mod_ind_remainingTimer, mod_total_remainingTimer;
 QTimer *GSLtimer=new QTimer(), *unmodtimer=new QTimer(), *mod_indtimer=new QTimer(), *mod_totaltimer=new QTimer();
 std::vector<bool> present;
+unsigned int present_num, present_voting_num, total_num;
 
 alphuntue::alphuntue(QWidget *parent) :
 	QMainWindow(parent),
@@ -35,17 +42,54 @@ alphuntue::alphuntue(QWidget *parent) :
 	ui->mod_topic_label->clear();
 	ui->mod_countryimg_label->clear();
 	ui->mod_countryName_label->clear();
+	//load council.txt
+	QString filelocc=QCoreApplication::applicationDirPath();
+	filelocc+="/council.txt";
+	QFile filec(filelocc);
+	if (!filec.open(QIODevice::ReadOnly)) {
+		QMessageBox::critical(this, "Error", "coucil.txt not found in the same directory as application.");
+		return;
+	}
+	QString council_name="-", fileloc;
+	QTextStream council(&filec);
+	QString parse=council.readLine();
+	while(!parse.isEmpty()){
+		if(parse.startsWith("TOPICS: ", Qt::CaseInsensitive)){
+			parse=parse.mid(8);
+			topics.push_back(parse);
+			parse=council.readLine();
+			while((!parse.startsWith("COUNTRY_LIST: ", Qt::CaseInsensitive)&&!parse.startsWith("COUNCIL: ", Qt::CaseInsensitive))&&!parse.isEmpty()){
+				topics.push_back(parse);
+				parse=council.readLine();
+			}
+		}
+		if(parse.startsWith("COUNCIL: ", Qt::CaseInsensitive)){
+			parse=parse.mid(9);
+			council_name=parse;
+		}
+		if(parse.startsWith("THEME: ")){
+			parse=parse.mid(2);
+			QMessageBox::information(this, "Commented", parse);
+		}
+		if(parse.startsWith("COUNTRY_LIST: ", Qt::CaseInsensitive)){
+			parse=parse.mid(14);
+			fileloc=parse;
+			fileloc.prepend('/');
+		}
+		parse=council.readLine();
+	}
+	//update UI
+	ui->main_council_title->setText(council_name);
 	//load country.txt
-	QString fileloc=QCoreApplication::applicationDirPath();
-	fileloc+="/country.txt";
+	fileloc.prepend(QCoreApplication::applicationDirPath());
 	QFile file(fileloc);
 	if (!file.open(QIODevice::ReadOnly)) {
-		QMessageBox::critical(this, "Error", "country.txt not found in the same directory as application.");
+		QMessageBox::critical(this, "Error", fileloc);
 		return;
 	}
 	QTextStream in(&file);
 	QString countrytemp=in.readLine();
-	while(countrytemp!=0){
+	while(!countrytemp.isEmpty()){
 		allcountries.append(countrytemp);
 		countrytemp=in.readLine();
 	}
@@ -57,6 +101,7 @@ alphuntue::alphuntue(QWidget *parent) :
 	while(i<allcountries.size()){
 		ui->GSL_GSLcountry->addItem(allcountries.at(i).toLocal8Bit().constData());
 		ui->mod_modcountry->addItem(allcountries.at(i).toLocal8Bit().constData());
+		ui->SS_countries->addItem(allcountries.at(i).toLocal8Bit().constData());
 		i++;
 	}
 	//disable all things that need to be disabled
@@ -339,6 +384,11 @@ void alphuntue::on_actionCountries_present_triggered()
 	selectPresent.setLayout(layout);
 	selectPresent.exec();
 	updateLists();
+	present_num=count_if(present.begin(),present.end(), ifOne);
+	QString display=QString::number(present_num);
+	display.append('/');
+	display.append(QString::number(allcountries.count()));
+	ui->main_present_count->setText(display);
 }
 
 void alphuntue::updatePresent(QListWidgetItem *item){
@@ -370,6 +420,7 @@ void alphuntue::updateLists(){
 		if(present[i]==true){
 			ui->GSL_GSLcountry->addItem(allcountries.at(i).toLocal8Bit().constData());
 			ui->mod_modcountry->addItem(allcountries.at(i).toLocal8Bit().constData());
+			ui->SS_countries->addItem(allcountries.at(i).toLocal8Bit().constData());
 		}
 		i++;
 	}
@@ -604,13 +655,13 @@ void alphuntue::mod_total_timerUpdate(){
 		ui->mod_total_elapsed_label->setText(label);
 		ui->mod_total_progressBar->setValue(mod_totaltime_elapsed);
 	}
-	else{
+	/*else{
 		mod_stopped();
 		QMessageBox msgBox;
 		msgBox.setText("Time for the moderated caucus has elapsed");
 		msgBox.setIcon(QMessageBox::Information);
 		msgBox.exec();
-	}
+	}*/
 }
 
 void alphuntue::mod_stopped(){
@@ -744,7 +795,7 @@ void alphuntue::on_mod_resume_clicked()
 
 void alphuntue::on_GSL_addAllPresentDel_clicked()
 {
-	unsigned int i=0;
+	int i=0;
 	while(i<allcountries.size()){
 		if(present[i]==true){
 			QString countryname=allcountries[i];
@@ -768,4 +819,65 @@ void alphuntue::on_GSL_remove_clicked()
 	}
 	QListWidgetItem * remove=ui->GSL->takeItem(row);
 	delete remove;
+}
+
+void alphuntue::on_actionAbout_Alphuntue_triggered()
+{
+	QDialog about;
+	about.setModal(true);
+	QLabel *text=new QLabel("Made by hometue.");
+	QPushButton *button=new QPushButton("Ok", this);
+	QVBoxLayout *layout = new QVBoxLayout();
+	layout->addWidget(text);
+	layout->addWidget(button);
+	about.setLayout(layout);
+	connect(button, &QPushButton::clicked, &about, &QDialog::accept);
+	about.exec();
+}
+
+void alphuntue::on_actionSave_state_triggered()
+{
+	QString defaultloc=QCoreApplication::applicationDirPath();
+	defaultloc.append("/present.txt");
+	QString saveloc=QFileDialog::getSaveFileName(this, "Save File", defaultloc,"Text Files (*.txt)");
+	QFile file(saveloc);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
+		QMessageBox msgBox;
+		msgBox.setText("Could not write to storage or canceled.");
+		msgBox.setIcon(QMessageBox::Critical);
+		msgBox.exec();
+		return;
+	}
+	QTextStream out(&file);
+	int i=0;
+	while(i<allcountries.size()){
+		if(present[i]==true){
+			out<<'1';
+		}
+		else{
+			out<<'0';
+		}
+		i++;
+	}
+	out<<'\n';
+	QMessageBox msgBox;
+	msgBox.setText("Saved successfully");
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.exec();
+}
+
+void alphuntue::on_actionLoad_state_triggered()
+{
+	QString defaultloc=QCoreApplication::applicationDirPath();
+	defaultloc.append("/present.txt");
+	QString saveloc=QFileDialog::getOpenFileName(this, "Load File", defaultloc,"Text Files (*.txt)");
+	QFile file(saveloc);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
+		QMessageBox msgBox;
+		msgBox.setText("Could not read to storage or canceled.");
+		msgBox.setIcon(QMessageBox::Critical);
+		msgBox.exec();
+		return;
+	}
+
 }

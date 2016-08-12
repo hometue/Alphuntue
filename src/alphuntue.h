@@ -107,6 +107,12 @@ private slots:
 
 	void on_GSL_remove_clicked();
 
+	void on_actionAbout_Alphuntue_triggered();
+
+	void on_actionSave_state_triggered();
+
+	void on_actionLoad_state_triggered();
+
 private:
     Ui::alphuntue *ui;
 };

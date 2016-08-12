@@ -1,0 +1,6 @@
+COUNCIL: Un-united Neptune
+TOPICS: Sugar
+Spice
+And everything nice
+COUNTRY_LIST: country.txt
+//THEME: theme.txt
